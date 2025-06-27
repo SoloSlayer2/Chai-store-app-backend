@@ -1,0 +1,116 @@
+'''Exactly, Swastik — you got it 💯.
+
+---
+
+## 🔍 Why You Can’t Use `Depends()` in Middleware
+
+Here’s the key concept:
+
+### ✅ FastAPI’s `Depends()` system only works **after** the middleware phase.
+
+* Middleware is part of **Starlette’s lower-level request/response lifecycle**.
+* `Depends()` is a **FastAPI feature** that only activates **inside routes** and **dependency functions** — not middleware.
+
+That’s why this fails in middleware:
+
+```python
+def jwt_middleware(request: Request, db: Session = Depends(get_db)):
+    ...
+```
+
+You’ll get an error like:
+**"TypeError: jwt\_middleware() got an unexpected keyword argument 'db'"**
+
+---
+
+## ✅ So what do we do instead?
+
+You **manually** do what `Depends(get_db)` would do:
+
+```python
+from db.setup import SessionLocal
+
+db: Session = SessionLocal()
+# ... use db
+db.close()
+```
+
+It’s like **DIY dependency injection** — same result, just no FastAPI magic involved.
+
+---
+
+## 💡 TL;DR
+
+| Concept              | Route/Dependency | Middleware      |
+| -------------------- | ---------------- | --------------- |
+| `Depends(get_db)`    | ✅ Yes            | ❌ Not supported |
+| Manual DB session    | ✅ Yes            | ✅ Yes           |
+| `request.state.user` | ✅ Common pattern | ✅ Yes           |
+
+---
+
+Let me know if you'd like to [turn this user-loading logic into a dependency for protected routes after middleware runs](f) — for maximum modularity!
+"""
+
+"""Great question — this line is doing something very handy and elegant in FastAPI:
+
+```python
+request.state.user = user
+```
+
+---
+
+## 🧠 What is `request.state`?
+
+`request.state` is a **shared place to store custom data** on the `Request` object during a request’s lifecycle.
+
+* It's like attaching a temporary "sticky note" to the request.
+* Anything you set on `request.state` in middleware (or elsewhere) is **available later** — e.g., in your route handlers or dependencies.
+
+---
+
+## ✅ Why do we use `request.state.user`?
+
+Because after decoding the JWT and fetching the user from the DB in middleware, you want to **make that user accessible** downstream — without decoding the token again!
+
+### 💡 Analogy:
+
+Think of `request.state` like `req.user` in Express.js:
+
+```js
+req.user = userFromDB
+```
+
+Same thing here:
+
+```python
+request.state.user = userFromDB
+```
+
+---
+
+## 📦 Example usage in a route
+
+```python
+from fastapi import Request
+
+@app.get("/me")
+async def get_profile(request: Request):
+    user = request.state.user  # 🎯 grabbed from middleware
+    return {"username": user.username, "email": user.email}
+```
+
+---
+
+## ✅ Summary
+
+| Feature              | Purpose                                 |
+| -------------------- | --------------------------------------- |
+| `request.state`      | Temporary per-request storage           |
+| `request.state.user` | Pass user info from middleware to route |
+| Lifetime             | Valid **only for that request**         |
+
+---
+
+Let me know if you want to [enforce type hints or defaults on `request.state.user`](f) for cleaner dev experience!
+'''
