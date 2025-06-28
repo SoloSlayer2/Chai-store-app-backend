@@ -1,14 +1,24 @@
-from pydantic import BaseModel
-from typing import Annotated
-from pydantic import BaseModel, Field
+from decimal import Decimal
+from typing import Annotated, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ChaiPydanticSchema(BaseModel):
     name: str
-    price: Annotated[int, Field(max_digits=5, decimal_places=2)]
-    chai_type: str
+    price: Annotated[Decimal, Field(max_digits=5, decimal_places=2)]
+    chai_type: Optional[str]
     available: bool
 
+    model_config = ConfigDict(from_attributes=True)
+
+
 class OrderChaiFormat(BaseModel):
-    name:str
-    quantity: Annotated[int,Field(decimal_places=0)]
+    name: str
+    quantity: Annotated[Decimal, Field(decimal_places=0)]
+
+
+class ChaiReceipt(BaseModel):
+    order: Optional[Dict[str, str]]
+    notAvailable: Optional[List[str]]
+    Total: Decimal

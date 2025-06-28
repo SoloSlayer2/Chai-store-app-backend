@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, Request, Response
+from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
@@ -8,9 +8,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.db.setup_db import SessionLocal
-from app.models.chai_models import ChaiStore
 from app.models.users_models import Users
-from app.schemas.ChaiSchema import OrderChaiFormat
 from app.schemas.UserSchema import (
     ResetPasswordFormat,
     UserLoginOrRegisterSchema,

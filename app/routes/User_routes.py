@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Request
 from app.schemas.UserSchema import ResetPasswordFormat, UserLoginOrRegisterSchema
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+user_router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 def get_db():
@@ -20,21 +20,21 @@ def get_db():
         db.close()
 
 
-@router.post("/register")
+@user_router.post("/register")
 def register(credentials: UserLoginOrRegisterSchema, db: Session = Depends(get_db)):
     return register_user(credentials=credentials, db=db)
 
 
-@router.post("/login")
+@user_router.post("/login")
 def login(credentials: UserLoginOrRegisterSchema, db: Session = Depends(get_db)):
     return login_user(credentials=credentials, db=db)
 
 
-@router.post("/reset-password")
+@user_router.post("/reset-password")
 def reset_pwd(credentials: ResetPasswordFormat, db: Session = Depends(get_db)):
     return reset_password(credentials=credentials, db=db)
 
 
-@router.post("/logout")
+@user_router.post("/logout")
 def logout(req: Request, db: Session = Depends(get_db)):
     return logout_user(req=req, db=db)
